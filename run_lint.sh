@@ -1,0 +1,3 @@
+#!/bin/bash
+
+golangci-lint -c ./.golangci.yml run ./...
