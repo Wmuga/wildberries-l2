@@ -1,0 +1,25 @@
+name: GoLint
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21.6'
+
+    - name: Lint
+      run: golangci-lint -c ./.golangci.yml run ./...
+
+    - name: Vet
+      run: go vet ./...
