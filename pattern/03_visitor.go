@@ -65,26 +65,26 @@ type Visitor interface {
 }
 
 // Его реализация
-type JsonVisitor struct {
+type JSONVisitor struct {
 	shapes []Shape
 	res    *bytes.Buffer
 }
 
-func (j *JsonVisitor) AddShape(s Shape) {
+func (j *JSONVisitor) AddShape(s Shape) {
 	j.shapes = append(j.shapes, s)
 }
 
-func (j *JsonVisitor) ForCircle(c *Circle) error {
+func (j *JSONVisitor) ForCircle(c *Circle) error {
 	_, err := fmt.Fprintf(j.res, `{"type":"circle","x":%d,"y":%d,"r":%d}`, c.X, c.Y, c.R)
 	return err
 }
 
-func (j *JsonVisitor) ForRectangle(r *Rectangle) error {
+func (j *JSONVisitor) ForRectangle(r *Rectangle) error {
 	_, err := fmt.Fprintf(j.res, `{"type":"rectangle","x":%d,"y":%d,"width":%d,"height":%d}`, r.X, r.Y, r.Widhth, r.Height)
 	return err
 }
 
-func (j *JsonVisitor) GetResult() ([]byte, error) {
+func (j *JSONVisitor) GetResult() ([]byte, error) {
 	if _, err := j.res.WriteRune('['); err != nil {
 		return nil, err
 	}
@@ -106,15 +106,15 @@ func (j *JsonVisitor) GetResult() ([]byte, error) {
 	return j.res.Bytes(), nil
 }
 
-func NewJsonVisitor() Visitor {
-	return &JsonVisitor{
+func NewJSONVisitor() Visitor {
+	return &JSONVisitor{
 		make([]Shape, 0),
 		&bytes.Buffer{},
 	}
 }
 
 func ExampleVisitorPattern() {
-	visitor := NewJsonVisitor()
+	visitor := NewJSONVisitor()
 	visitor.AddShape(&Circle{1, 2, 3})
 	visitor.AddShape(&Rectangle{1, 2, 3, 4})
 	visitor.AddShape(&Circle{3, 4, 6})
