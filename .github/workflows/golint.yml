@@ -1,4 +1,4 @@
-name: GoLint
+name: GoLintVetTest
 
 on:
   push:
