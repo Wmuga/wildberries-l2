@@ -33,6 +33,26 @@ start := time.Now()
 fmt.Printf(“fone after %v”, time.Since(start))
 */
 
+func ChannelMux(channels ...<-chan interface{}) <-chan interface{} {
+	muxed := make(chan interface{})
+	for _, c := range channels {
+		// На каждый из done каналов запускается горутина, ожидающая когда ее ожидаемый канал закроется
+		// Или закроется сам мультиплексированный done канал
+		go func(c <-chan interface{}) {
+			for {
+				select {
+				case <-c:
+					close(muxed)
+					return
+				case <-muxed:
+					return
+				}
+			}
+		}(c)
+	}
+	return muxed
+}
+
 func main() {
 
 }
