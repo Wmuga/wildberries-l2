@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -36,7 +37,9 @@ func TestConnection(t *testing.T) {
 	reader := bytes.Buffer{}
 	writer := bytes.Buffer{}
 	writer.WriteString(testMsg)
-	go telnet.Connect(address, port, timeout, &writer, &reader)
+	go func() {
+		fmt.Println(telnet.Connect(address, port, timeout, &writer, &reader))
+	}()
 	// дождаться обратного сообщения
 	time.Sleep(time.Millisecond * 100)
 	msg := reader.String()
