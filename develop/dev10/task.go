@@ -1,5 +1,16 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"net"
+	"os"
+	"strings"
+
+	"github.com/Wmuga/wildberries-l2/develop/dev10/flags"
+	"github.com/Wmuga/wildberries-l2/develop/dev10/telnet"
+)
+
 /*
 === Утилита telnet ===
 
@@ -15,6 +26,41 @@ go-telnet --timeout=10s host port go-telnet mysite.ru 8080 go-telnet --timeout=3
 При подключении к несуществующему сервер, программа должна завершаться через timeout.
 */
 
-func main() {
+// Для теста поднимается сервак, отсылающий все обратно
+func SetupLoopback(port string) {
+	l, err := net.Listen("tcp", "localhost:"+port)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+	con, err := l.Accept()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+	reader := bufio.NewReader(con)
+	for {
+		str, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+		// Завершение по exit
+		if strings.HasPrefix(str, "exit") {
+			con.Close()
+			l.Close()
+			return
+		}
 
+		fmt.Fprint(con, str)
+	}
+}
+
+func main() {
+	flags, args := flags.ParseArgs()
+	// go SetupLoopback(args[1])
+	err := telnet.Connect(args[0], args[1], flags.Timeout, os.Stdin, os.Stdout)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
