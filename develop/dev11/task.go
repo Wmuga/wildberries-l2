@@ -1,5 +1,19 @@
 package main
 
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
+	"github.com/Wmuga/wildberries-l2/develop/dev11/config"
+	"github.com/Wmuga/wildberries-l2/develop/dev11/controllers"
+	"github.com/Wmuga/wildberries-l2/develop/dev11/middleware"
+	"github.com/Wmuga/wildberries-l2/develop/dev11/repo"
+	"github.com/Wmuga/wildberries-l2/develop/dev11/service"
+)
+
 /*
 === HTTP server ===
 
@@ -23,5 +37,55 @@ package main
 */
 
 func main() {
+	cfg, err := config.ReadConfig("config.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	eventRepo := repo.NewMemoryRepo()
+	eventService := service.NewEventService(eventRepo)
+	controller := controllers.NewEventController(
+		eventService,
+		log.New(os.Stderr, "[ERR]", log.LUTC))
+
+	logMiddleware := middleware.GetRequestLogger(
+		log.New(os.Stdout, "[REQ]", log.LUTC),
+	)
+
+	mux := http.NewServeMux()
+	// POST методы
+	mux.Handle(
+		"/create_event",
+		middleware.SetMethodFunc("POST", controller.CreateEvent),
+	)
+	mux.Handle(
+		"/update_event",
+		middleware.SetMethodFunc("POST", controller.UpdateEvent),
+	)
+	mux.Handle(
+		"/delete_event",
+		middleware.SetMethodFunc("POST", controller.DeleteEvent),
+	)
+	// GET методы
+	mux.Handle(
+		"/events_for_day",
+		middleware.SetMethodFunc("GET", controller.EventsForDay),
+	)
+	mux.Handle(
+		"/events_for_week",
+		middleware.SetMethodFunc("GET", controller.EventsForWeek),
+	)
+	mux.Handle(
+		"/events_for_month",
+		middleware.SetMethodFunc("GET", controller.EventsForMonth),
+	)
+
+	server := http.Server{
+		Addr:         cfg.Address,
+		Handler:      logMiddleware(mux),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	fmt.Println("Server working on", cfg.Address)
+	fmt.Println(server.ListenAndServe())
 }
