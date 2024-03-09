@@ -1,5 +1,12 @@
 package main
 
+import (
+	"slices"
+	"strings"
+
+	"golang.org/x/exp/maps"
+)
+
 /*
 === Поиск анаграмм по словарю ===
 
@@ -18,6 +25,45 @@ package main
 
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
+
+func sortString(in string) string {
+	data := []rune(in)
+	slices.Sort(data)
+	return string(data)
+}
+
+func FindAnagrams(words []string) map[string][]string {
+	keyConv := map[string]string{}
+	// мапа мап, чтобы исключить повторения
+	temp := map[string]map[string]struct{}{}
+	res := map[string][]string{}
+
+	for i := range words {
+		word := strings.ToLower(words[i])
+		// формирование ключа как отсортированной строки по символам
+		k := sortString(word)
+		// Добавление в переводчик ключей нового элемента
+		if _, ex := keyConv[k]; !ex {
+			keyConv[k] = word
+			temp[k] = map[string]struct{}{}
+		}
+		temp[k][word] = struct{}{}
+	}
+	// Формирование результата
+	for k, v := range temp {
+		// Пропуск множеста из 1 элемента
+		if len(v) == 1 {
+			continue
+		}
+		// Получение всех слов множества
+		vals := maps.Keys(temp[k])
+		slices.Sort(vals)
+		// Возвращение ключа в нормальный вид
+		res[keyConv[k]] = vals
+	}
+
+	return res
+}
 
 func main() {
 
