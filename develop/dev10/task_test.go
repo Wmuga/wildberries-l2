@@ -41,7 +41,7 @@ func TestConnection(t *testing.T) {
 		fmt.Println(telnet.Connect(address, port, timeout, &writer, &reader))
 	}()
 	// дождаться обратного сообщения
-	time.Sleep(time.Millisecond * 100)
+	time.Sleep(time.Millisecond * 500)
 	msg := reader.String()
 	if !strings.Contains(msg, testMsg) {
 		t.Error("didnt recieve same message Got", msg, "Expected", testMsg)
