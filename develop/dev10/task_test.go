@@ -13,7 +13,7 @@ import (
 
 var (
 	address = "localhost"
-	port    = "1324"
+	port    = "6758"
 	timeout = 1
 	testMsg = "testmsg\n"
 )
